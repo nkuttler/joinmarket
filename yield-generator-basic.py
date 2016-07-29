@@ -40,19 +40,20 @@ log = get_log()
 # spent from utxos that try to make the highest balance even higher
 # so try to keep coins concentrated in one mixing depth
 class YieldGenerator(Maker):
-    statement_file = os.path.join('logs', 'yigen-statement.csv')
-
     def __init__(self, msgchan, wallet):
         Maker.__init__(self, msgchan, wallet)
         self.msgchan.register_channel_callbacks(self.on_welcome,
                                                 self.on_set_topic, None, None,
                                                 self.on_nick_leave, None)
         self.tx_unconfirm_timestamp = {}
+        self.set_statement_file()
+
+    def set_statement_file(self):
+        suffix = '-test' if get_network() == 'testnet' else ''
+        filename = 'yigen-statement{0}.csv'.format(suffix)
+        self.statement_file = os.path.join('logs', filename)
 
     def log_statement(self, data):
-        if get_network() == 'testnet':
-            return
-
         data = [str(d) for d in data]
         self.income_statement = open(self.statement_file, 'a')
         self.income_statement.write(','.join(data) + '\n')
